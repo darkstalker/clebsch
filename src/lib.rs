@@ -5,12 +5,7 @@ use num::rational::BigRational;
 
 fn factorial(n: i64) -> BigInt
 {
-    let mut acc = One::one();
-    for i in 2 .. n + 1
-    {
-        acc = acc * i.to_bigint().unwrap();
-    }
-    acc
+    (2..n + 1).fold(One::one(), |acc, i| acc * i.to_bigint().unwrap())
 }
 
 fn factorial_f(n: f32) -> BigInt
@@ -31,26 +26,27 @@ pub fn clebschgordansq(j1: f32, m1: f32, j2: f32, m2: f32, j12: f32, m12: f32) -
         return (0, Zero::zero())
     }
 
-    let kmin = -(0_f32.min(j12 - j2 + m1).min(j12 - j1 - m2).trunc());
-    let kmax = (j1 + j2 - j12).min(j1 - m1).min(j2 + m2).trunc();
+    let kmin = -(0_f32.min(j12 - j2 + m1).min(j12 - j1 - m2) as i64);
+    let kmax = (j1 + j2 - j12).min(j1 - m1).min(j2 + m2) as i64;
     if kmin > kmax
     {
         return (0, Zero::zero())
     }
 
-    let mut c1 = kmin as i64;
-    let mut c2 = (j1 + j2 - j12 - kmin) as i64;
-    let mut c3 = (j1 - m1 - kmin) as i64;
-    let mut c4 = (j2 + m2 - kmin) as i64;
-    let mut c5 = (j12 - j2 + m1 + kmin) as i64;
-    let mut c6 = (j12 - j1 - m2 + kmin) as i64;
+    let kmin_f = kmin as f32;
+    let mut c1 = kmin;
+    let mut c2 = (j1 + j2 - j12 - kmin_f) as i64;
+    let mut c3 = (j1 - m1 - kmin_f) as i64;
+    let mut c4 = (j2 + m2 - kmin_f) as i64;
+    let mut c5 = (j12 - j2 + m1 + kmin_f) as i64;
+    let mut c6 = (j12 - j1 - m2 + kmin_f) as i64;
     let mut c = BigRational::new(
-        minus_one_pow(kmin as i64).to_bigint().unwrap(),
+        minus_one_pow(kmin).to_bigint().unwrap(),
         factorial(c1) * factorial(c2) * factorial(c3) * factorial(c4) * factorial(c5) * factorial(c6)
     );
     let mut r = c.clone();
 
-    for _ in kmin as i64 .. kmax as i64  // k unused, removed the +1
+    for _ in kmin .. kmax
     {
         c1 += 1;
         c5 += 1;
